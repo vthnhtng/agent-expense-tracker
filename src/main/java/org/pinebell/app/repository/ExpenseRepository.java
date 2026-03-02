@@ -1,12 +1,12 @@
 package org.pinebell.app.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
-import org.pinebell.app.entity.Expense;
+import org.pinebell.app.domain.Expense;
 
 public interface ExpenseRepository {
-    public void create(Expense expense) throws RuntimeException;
-    public List<Expense> findAll() throws RuntimeException;
-    // public Expense findById(UUID id);
-    // public void update(Expense expense);
+    void save(Expense expense);
+    List<Expense> findAll();
+    List<Expense> findByDate(LocalDate date);
 }

@@ -1,4 +1,4 @@
-package org.pinebell.app.entity;
+package org.pinebell.app.domain;
 
 public enum ExpenseCategory {
     FOOD,
