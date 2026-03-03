@@ -1,5 +1,6 @@
 package org.pinebell.app.cli;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 
 import org.apache.commons.cli.CommandLine;
@@ -9,11 +10,18 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import org.pinebell.app.domain.ExpenseCategory;
+import org.pinebell.app.service.ExpenseService;
+import org.pinebell.app.service.api.data.AddExpenseRequest;
+import org.pinebell.app.service.api.data.AddExpenseResponse;
+
 public class AddCommandHandler implements CommandHandler {
     private final String commandName = "add";
     private final Options options;
+    private final ExpenseService expenseService;
 
-    public AddCommandHandler() {
+    public AddCommandHandler(ExpenseService expenseService) {
+        this.expenseService = expenseService;
         options = new Options();
 
         options.addOption(Option.builder()
@@ -50,7 +58,7 @@ public class AddCommandHandler implements CommandHandler {
         options.addOption(Option.builder()
             .longOpt("createdAt")
             .hasArg()
-            .desc("Create at date (dd-MM-yyyy hh:mm)")
+            .desc("Create at date (dd-MM-yyyy HH:mm)")
             .build()
         );
     }
@@ -60,7 +68,6 @@ public class AddCommandHandler implements CommandHandler {
         CommandLineParser parser = new DefaultParser();
 
         try {
-            // Skip the command name (args[0]) and parse only the options
             String[] optionArgs = Arrays.copyOfRange(args, 1, args.length);
             CommandLine cmd = parser.parse(options, optionArgs);
 
@@ -70,14 +77,22 @@ public class AddCommandHandler implements CommandHandler {
             String description = cmd.getOptionValue("description");
             String createdAt = cmd.getOptionValue("createdAt");
 
-            System.out.println("Add expense command:");
-            System.out.println("  amount      = " + amount);
-            System.out.println("  currency    = " + currency);
-            System.out.println("  category    = " + category);
-            System.out.println("  description = " + (description != null ? description : ""));
-            System.out.println("  createdAt   = " + (createdAt != null ? createdAt : ""));
+            AddExpenseRequest request = new AddExpenseRequest(
+                new BigDecimal(amount),
+                currency,
+                ExpenseCategory.valueOf(category),
+                description,
+                createdAt
+            );
+
+            AddExpenseResponse response = expenseService.createExpense(request);
+            System.out.println(response.message());
         } catch (ParseException e) {
             System.out.println("Failed to parse options for 'add' command: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid input: " + e.getMessage());
+        } catch (RuntimeException e) {
+            System.out.println("Error saving expense: " + e.getMessage());
         }
     }
 
