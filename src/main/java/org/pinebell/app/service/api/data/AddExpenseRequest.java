@@ -8,5 +8,7 @@ public record AddExpenseRequest(
         BigDecimal amount,
         String currency,
         ExpenseCategory category,
-        String description) {
+        String description,
+        String createdAt
+){
 }
